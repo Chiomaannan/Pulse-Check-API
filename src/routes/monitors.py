@@ -10,8 +10,8 @@ from src.controllers.monitor_controller import (
 
 router = APIRouter(prefix="/monitors", tags=["Monitors"])
 
-router.post("/", status_code=201)(register_monitor)
+router.post("", status_code=201)(register_monitor)
 router.post("/{monitor_id}/heartbeat")(heartbeat)
 router.post("/{monitor_id}/pause")(pause_monitor)
 router.get("/{monitor_id}")(get_monitor)
-router.get("/")(get_all_monitors)
+router.get("")(get_all_monitors)
