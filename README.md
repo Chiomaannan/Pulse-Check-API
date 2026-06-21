@@ -92,15 +92,32 @@ sequenceDiagram
 
 ```mermaid
 stateDiagram-v2
-    [*] --> active : POST /monitors\n(register)
+    state "active — countdown running" as active
+    state "paused — timer frozen, no alerts" as paused
+    state "down — alert fired" as down
 
-    active --> paused : POST /monitors/{id}/pause\nexpires_at = null
+    [*] --> active : POST /monitors
 
-    active --> down : Scheduler detects expiry\nexpires_at <= now\nAlert fires
+    active --> paused : POST /monitors/{id}/pause
+    active --> down : heartbeat timeout
 
-    paused --> active : POST /monitors/{id}/heartbeat\nexpires_at = now + timeout
+    paused --> active : POST /monitors/{id}/heartbeat
+    down --> active : POST /monitors/{id}/heartbeat
 
-    down --> active : POST /monitors/{id}/heartbeat\n(auto-recovery)
+    note right of active
+        expires_at = now + timeout
+        Heartbeats keep the timer alive
+    end note
+
+    note right of paused
+        expires_at = null
+        Resume by sending any heartbeat
+    end note
+
+    note right of down
+        expires_at = null
+        Alert already sent — heartbeat auto-recovers
+    end note
 ```
 
 ---
