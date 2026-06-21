@@ -187,9 +187,30 @@ Interactive API docs are available at `http://localhost:8000/docs`.
 }
 ```
 
+**Response — 409 Conflict** (monitor ID already registered)
+```json
+{ "detail": "Monitor 'device-123' already exists" }
+```
+
+**Response — 422 Unprocessable Entity** (invalid input, e.g. negative timeout)
+```json
+{
+  "detail": [
+    {
+      "type": "value_error",
+      "loc": ["body", "timeout"],
+      "msg": "Value error, timeout must be a positive integer (seconds)",
+      "input": -5
+    }
+  ]
+}
+```
+
 ---
 
 ### POST `/monitors/{id}/heartbeat` — Reset the countdown
+
+Works regardless of current status — if the monitor is `down`, this auto-recovers it back to `active` and restarts the countdown without needing to re-register.
 
 **Response — 200 OK**
 ```json
@@ -220,6 +241,11 @@ Stops the countdown completely. No alerts will fire while paused. Sending a hear
     "expires_at": null
   }
 }
+```
+
+**Response — 409 Conflict** (already paused)
+```json
+{ "detail": "Monitor 'device-123' is already paused" }
 ```
 
 ---
